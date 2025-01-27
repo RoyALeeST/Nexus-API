@@ -1,10 +1,11 @@
 import {
   Body,
   Controller,
-  Get,
   HttpCode,
   HttpStatus,
   Post,
+  Req,
+  Response,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -13,6 +14,7 @@ import { Public } from '@decorators/public.decorator';
 import { AuthGuard } from './auth.guard';
 import { Roles } from '@decorators/roles.decorator';
 import { Role } from 'utils/enums/roles.enum';
+import { RolesGuard } from './roles.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -31,12 +33,6 @@ export class AuthController {
   @Public()
   signIn(@Body() signInDto: any) {
     return this.authService.signIn(signInDto.email, signInDto.password);
-  }
-
-  @UseGuards(AuthGuard)
-  @Post('profile')
-  getProfile(@Body() body: Record<string, any>) {
-    return body;
   }
 
   /**
@@ -77,6 +73,19 @@ export class AuthController {
     return {
       message: 'Forgot password successful',
       data: body,
+    };
+  }
+
+  @Post('profile')
+  @UseGuards(AuthGuard)
+  @Roles(Role.Admin)
+  @UseGuards(RolesGuard)
+  async getProfile(@Body() body: Record<string, any>, @Req() req: any) {
+    console.log(req.locals.user);
+    console.log(req.tokenData);
+    return {
+      message: 'Profile fetched successfully',
+      data: req.locals.user,
     };
   }
 }

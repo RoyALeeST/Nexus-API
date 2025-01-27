@@ -44,4 +44,10 @@ export class BlogController {
   getPostsByAuthor(@Body() post: any) {
     return this.blogService.getPostsByAuthor(post.author);
   }
+
+  @Post('getByCategory')
+  @Public()
+  getPostsByCategory(@Body() post: any) {
+    return this.blogService.getPostsByCategory(post.category);
+  }
 }
