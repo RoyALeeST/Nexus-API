@@ -28,10 +28,11 @@ export class LoggerMiddleware implements NestMiddleware {
         if (!user) {
           throw new UnauthorizedException('Usuario no encontrado');
         }
+        req.locals = { ...req.locals, user };
         next();
       } catch (error) {
         console.log(error);
-        throw new UnauthorizedException('Autorizacion Invalida');
+        throw new UnauthorizedException('Autorizacion Invalida', error.message);
       }
     }
   }
