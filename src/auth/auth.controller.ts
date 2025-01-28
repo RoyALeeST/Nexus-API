@@ -81,8 +81,6 @@ export class AuthController {
   @Roles(Role.Admin)
   @UseGuards(RolesGuard)
   async getProfile(@Body() body: Record<string, any>, @Req() req: any) {
-    console.log(req.locals.user);
-    console.log(req.tokenData);
     return {
       message: 'Profile fetched successfully',
       data: req.locals.user,

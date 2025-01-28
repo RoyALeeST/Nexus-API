@@ -1,7 +1,9 @@
 export class BlogPost {
+  publicId: string;
   title: string;
   content: string;
   author: string;
-  createdAt: Date;
+  creationDate: Date;
   rating: number;
+  deleted: boolean;
 }
