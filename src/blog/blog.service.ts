@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { BlogPost } from './models/BlogPost.model';
@@ -33,7 +37,23 @@ export class BlogService {
    * @returns {Promise<BlogPost>} The updated blog post
    */
   async updatePost(id: string, post: BlogPost): Promise<BlogPost> {
-    return this.blogPostModel.findByIdAndUpdate(id, post);
+    const postInDb = await this.blogPostModel.findOneAndUpdate({
+      publicId: id,
+    });
+    if (!postInDb) {
+      throw new NotFoundException('Post No Existe');
+    }
+    if (postInDb.author !== post.author) {
+      throw new ForbiddenException(
+        'No tienes permisos para actualizar este post',
+      );
+    }
+    if (postInDb.deleted) {
+      throw new ForbiddenException('Post ya no existe');
+    }
+    const updatedPost = { ...postInDb, ...post };
+    await this.blogPostModel.updateOne({ publicId: id }, updatedPost).exec();
+    return updatedPost;
   }
 
   /**
@@ -42,7 +62,10 @@ export class BlogService {
    * @returns {Promise<BlogPost>} The deleted blog post
    */
   async deletePost(id: string): Promise<BlogPost> {
-    return this.blogPostModel.findByIdAndDelete(id);
+    return this.blogPostModel.findOneAndUpdate(
+      { publicId: id },
+      { deleted: true },
+    );
   }
 
   /**
@@ -51,7 +74,7 @@ export class BlogService {
    * @returns {Promise<BlogPost>} The requested blog post
    */
   async getPostById(id: string): Promise<BlogPost> {
-    return this.blogPostModel.findById(id);
+    return this.blogPostModel.findOne({ publicId: id });
   }
 
   /**
