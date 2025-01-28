@@ -1,11 +1,21 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 import { Role } from 'utils/enums/roles.enum';
+import { v4 as uuid } from 'uuid';
 
 export type UserDocument = HydratedDocument<User>;
 
 @Schema()
 export class User {
+  @Prop({
+    required: true,
+    unique: true,
+    default: function genUUID() {
+      return uuid();
+    },
+  })
+  publicId: string;
+
   @Prop()
   username: string;
 
@@ -20,6 +30,9 @@ export class User {
 
   @Prop()
   password: string;
+
+  @Prop()
+  deleted: boolean;
 
   @Prop()
   roles: Role[];

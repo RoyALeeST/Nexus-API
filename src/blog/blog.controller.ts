@@ -1,13 +1,14 @@
 import {
   Body,
   Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
+  NotFoundException,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { BlogService } from './blog.service';
 import { Public } from '@decorators/public.decorator';
+import { AuthGuard } from 'auth/auth.guard';
+import { BlogPost } from './models/BlogPost.model';
 
 @Controller('blog')
 export class BlogController {
@@ -19,35 +20,37 @@ export class BlogController {
     return this.blogService.getPosts();
   }
 
-  @Post('create')
-  createPost(@Body() post: any) {
+  @Post('create-post')
+  @UseGuards(AuthGuard)
+  createPost(@Body() post: BlogPost) {
     return this.blogService.createPost(post);
   }
 
-  @Post('update')
-  updatePost(@Body() post: any) {
-    return this.blogService.updatePost(post.id, post);
+  @Post('update-post')
+  @UseGuards(AuthGuard)
+  updatePost(@Body() post: BlogPost) {
+    return this.blogService.updatePost(post.publicId, post);
   }
 
-  @Post('delete')
-  deletePost(@Body() post: any) {
-    return this.blogService.deletePost(post.id);
+  @Post('delete-post')
+  @UseGuards(AuthGuard)
+  deletePost(@Body() post: BlogPost) {
+    return this.blogService.deletePost(post.publicId);
   }
 
-  @Post('getById')
-  getPostById(@Body() post: any) {
-    return this.blogService.getPostById(post.id);
-  }
-
-  @Post('getByAuthor')
+  @Post('get-post-by-id')
   @Public()
-  getPostsByAuthor(@Body() post: any) {
+  async getPostById(@Body() post: BlogPost) {
+    const postInDb = await this.blogService.getPostById(post.publicId);
+    if (!postInDb) {
+      throw new NotFoundException('Post not found');
+    }
+    return postInDb;
+  }
+
+  @Post('get-posts-by-author')
+  @Public()
+  getPostsByAuthor(@Body() post: BlogPost) {
     return this.blogService.getPostsByAuthor(post.author);
-  }
-
-  @Post('getByCategory')
-  @Public()
-  getPostsByCategory(@Body() post: any) {
-    return this.blogService.getPostsByCategory(post.category);
   }
 }
