@@ -5,6 +5,9 @@ import { User } from './users/user.schema';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from './users/users.service';
 import * as bcrypt from 'bcrypt';
+import { ConfigService } from '@nestjs/config';
+import { Response } from 'express';
+const ms = require('ms');
 
 @Injectable()
 export class AuthService {
@@ -15,6 +18,7 @@ export class AuthService {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
     private usersService: UsersService,
+    private readonly configService: ConfigService,
     private jwtService: JwtService,
   ) {}
 
@@ -88,5 +92,52 @@ export class AuthService {
   async findUserByEmail(email: string): Promise<User> {
     const user = await this.userModel.findOne({ email });
     return user;
+  }
+
+  async login(
+    userData: User,
+    response: Response,
+  ): Promise<{ accessToken: string }> {
+    const user = await this.usersService.findOne(userData.email);
+    const isMatch = await bcrypt.compare(userData.password, user?.password);
+    if (!isMatch) {
+      throw new UnauthorizedException();
+    }
+    const accessToken = await this.jwtService.signAsync({
+      email: user.email,
+      roles: user.roles,
+    });
+    if (!accessToken) {
+      throw new UnauthorizedException();
+    }
+    user.accessToken = accessToken;
+    await this.usersService.updateUser(user.id, user);
+
+    const expires = new Date();
+    expires.setMilliseconds(
+      expires.getMilliseconds() +
+        ms(this.configService.getOrThrow<string>('JWT_EXPIRATION')),
+    );
+
+    response.cookie('Authentication', accessToken, {
+      secure: true,
+      httpOnly: true,
+      expires,
+    });
+
+    return { accessToken };
+  }
+
+  async verifyUser(email: string, password: string) {
+    try {
+      const user = await this.usersService.findOne(email);
+      const authenticated = await bcrypt.compare(password, user?.password);
+      if (!authenticated) {
+        throw new UnauthorizedException();
+      }
+      return user;
+    } catch (err) {
+      throw new UnauthorizedException('Credentials are not valid.');
+    }
   }
 }

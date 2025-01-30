@@ -30,11 +30,13 @@ export class LoggerMiddleware implements NestMiddleware {
         }
         req.locals = { ...req.locals, user };
         next();
+        return;
       } catch (error) {
         console.log(error);
         throw new UnauthorizedException('Autorizacion Invalida', error.message);
       }
     }
+    throw new UnauthorizedException('Autorizacion Invalida');
   }
   private extractTokenFromHeader(request: Request): string | undefined {
     const { authorization }: any = request.headers;
