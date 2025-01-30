@@ -14,6 +14,7 @@ export class AuthenticationMiddleware implements NestMiddleware {
     private jwtService: JwtService,
     private readonly authService: AuthService,
   ) {}
+
   async use(req: Request, res: Response, next: NextFunction) {
     const token = this.extractTokenFromHeader(req);
     if (token) {
@@ -34,10 +35,11 @@ export class AuthenticationMiddleware implements NestMiddleware {
         console.log(error);
         throw new UnauthorizedException('Autorizacion Invalida', error.message);
       }
+    } else {
+      throw new UnauthorizedException('Autorizacion Invalida', 'Token inexistente');
     }
-
-    throw new UnauthorizedException('Autorizacion Invalida', 'Token inexistente');
   }
+
   private extractTokenFromHeader(request: Request): string | undefined {
     const { authorization }: any = request.headers;
     return authorization;
