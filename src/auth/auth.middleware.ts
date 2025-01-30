@@ -31,6 +31,7 @@ export class AuthenticationMiddleware implements NestMiddleware {
         }
         req.locals = { ...req.locals, user };
         next();
+        return;
       } catch (error) {
         console.log(error);
         throw new UnauthorizedException('Autorizacion Invalida', error.message);
@@ -38,6 +39,7 @@ export class AuthenticationMiddleware implements NestMiddleware {
     } else {
       throw new UnauthorizedException('Autorizacion Invalida', 'Token inexistente');
     }
+    throw new UnauthorizedException('Autorizacion Invalida');
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {
