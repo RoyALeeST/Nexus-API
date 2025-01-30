@@ -10,7 +10,7 @@ import { AuthController } from './auth/auth.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
-import { LoggerMiddleware } from './auth/auth.middleware';
+import { AuthenticationMiddleware } from './auth/auth.middleware';
 import { BlogController } from 'blog/blog.controller';
 import { BlogModule } from 'blog/blog.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -55,7 +55,7 @@ import { LoggerModule } from 'nestjs-pino';
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
-      .apply(LoggerMiddleware)
+      .apply(AuthenticationMiddleware)
       .exclude(
         { path: 'auth/login', method: RequestMethod.POST },
         { path: 'auth/register', method: RequestMethod.POST },
