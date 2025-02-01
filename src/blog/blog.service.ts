@@ -1,16 +1,16 @@
-import {
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { BlogPost } from './models/BlogPost.model';
+import { Model, Types } from 'mongoose';
+
+import { BlogPost } from './schemas/BlogPost.schema';
+import { CreateBlogPostDto, UpdateBlogPostDto } from './dtos/blogpost.dto';
+import { User } from 'auth/users/user.schema';
 
 @Injectable()
 export class BlogService {
   constructor(
     @InjectModel(BlogPost.name) private blogPostModel: Model<BlogPost>,
+    @InjectModel(User.name) private userModel: Model<User>,
   ) {}
 
   /**
@@ -18,72 +18,167 @@ export class BlogService {
    * @returns {Promise<BlogPost[]>} Array of all blog posts
    */
   async getPosts(): Promise<BlogPost[]> {
-    return this.blogPostModel.find();
+    try {
+      return await this.blogPostModel
+        .find({ deleted: false })
+        .populate('author', 'publicId name username')
+        .sort({ creationDate: -1 })
+        .exec();
+    } catch (error) {
+      throw new BadRequestException('Error al obtener los posts');
+    }
   }
+
 
   /**
    * Creates a new blog post
-   * @param {BlogPost} post - The blog post data to create
+   * @param {CreateBlogPostDto} createPostDto - Dto for the post to create
    * @returns {Promise<BlogPost>} The created blog post
    */
-  async createPost(post: BlogPost): Promise<BlogPost> {
-    return this.blogPostModel.create(post);
+  async createPost(createPostDto: CreateBlogPostDto): Promise<BlogPost> {
+    try {
+      const newPost = await this.blogPostModel.create(createPostDto);
+      return newPost.populate('author', 'publicId name username');
+    } catch (error) {
+      throw new BadRequestException('Error al crear el post');
+    }
   }
+
 
   /**
    * Updates an existing blog post
    * @param {string} id - ID of the post to update
-   * @param {BlogPost} post - Updated blog post data
+   * @param {Types.ObjectId} userId - ID of the user updating the post
+   * @param {UpdateBlogPostDto} updatePostDto - Update dto for the post
    * @returns {Promise<BlogPost>} The updated blog post
    */
-  async updatePost(id: string, post: BlogPost): Promise<BlogPost> {
-    const postInDb = await this.blogPostModel.findOneAndUpdate({
-      publicId: id,
-    });
-    if (!postInDb) {
-      throw new NotFoundException('Post No Existe');
+  async updatePost(id: string, userId: Types.ObjectId, updatePostDto: UpdateBlogPostDto): Promise<BlogPost> {
+    try {
+      const post = await this.blogPostModel
+        .findOne({ publicId: id })
+        .populate('author', '_id');
+  
+      if (!post) {
+        throw new NotFoundException('El post no fue encontrado');
+      }
+  
+      if (!post.author._id.equals(userId)) {
+        throw new ForbiddenException('No tienes permisos para actualizar este post');
+      }
+  
+      const updatedPost = await this.blogPostModel
+        .findOneAndUpdate(
+          { publicId: id },
+          {
+            $set: { 
+              title: updatePostDto.title,
+              content: updatePostDto.content,
+            }
+          },
+          { new: true }
+        )
+        .populate('author', 'publicId name username');
+  
+
+      if (!updatedPost) {
+        throw new NotFoundException('El post no fue actualizado');
+      };
+
+      return updatedPost;
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof ForbiddenException) {
+        throw error;
+      }
+
+      throw new BadRequestException('Error al actualizar el post');
     }
-    if (postInDb.author !== post.author) {
-      throw new ForbiddenException(
-        'No tienes permisos para actualizar este post',
-      );
-    }
-    if (postInDb.deleted) {
-      throw new ForbiddenException('Post ya no existe');
-    }
-    const updatedPost = { ...postInDb, ...post };
-    await this.blogPostModel.updateOne({ publicId: id }, updatedPost).exec();
-    return updatedPost;
+    
   }
 
   /**
    * Deletes a blog post
    * @param {string} id - ID of the post to delete
-   * @returns {Promise<BlogPost>} The deleted blog post
+   * @returns {Promise<void>} A void promise that completes when the post is deleted
    */
-  async deletePost(id: string): Promise<BlogPost> {
-    return this.blogPostModel.findOneAndUpdate(
-      { publicId: id },
-      { deleted: true },
-    );
+  async deletePost(id: string, userId: Types.ObjectId): Promise<void> {
+    try {
+      const postToDelete = await this.blogPostModel
+        .findOne({ publicId: id, deleted: false })
+        .populate('author', '_id')
+        .exec();
+
+      if (!userId.equals(postToDelete.author._id)) {
+        throw new ForbiddenException('No tienes permisos para eliminar este post');
+      }
+
+      const deleteResult = await this.blogPostModel
+        .findOneAndUpdate(
+          { publicId: id , deleted: false },
+          { $set:
+            { deleted: true }
+          }
+        )
+        .exec();
+
+      if (!deleteResult) {
+        throw new NotFoundException('El post no fue encontrado o ya fue eliminado');
+      }
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadRequestException('Error al eliminar el post');
+    }
   }
 
   /**
    * Retrieves a blog post by ID
-   * @param {string} id - ID of the post to retrieve
+   * @param {string} id - Public ID of the post to retrieve
    * @returns {Promise<BlogPost>} The requested blog post
    */
   async getPostById(id: string): Promise<BlogPost> {
-    return this.blogPostModel.findOne({ publicId: id });
+    try {
+      const post = await this.blogPostModel
+        .findOne({ publicId: id, deleted: false })
+        .populate('author', 'publicId name username')
+        .exec();
+
+      if (!post) {
+        throw new NotFoundException('El post no fue encontrado');
+      }
+
+      return post;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadRequestException('Error al obtener el post');
+    }
   }
 
   /**
    * Retrieves all blog posts by a specific author
-   * @param {string} author - Author name to filter by
+   * @param {string} authorPublicId - Author public ID to filter by
    * @returns {Promise<BlogPost[]>} Array of matching blog posts
    */
-  async getPostsByAuthor(author: string): Promise<BlogPost[]> {
-    return this.blogPostModel.find({ author });
+  async getPostsByAuthor(authorPublicId: string): Promise<BlogPost[]> {
+    try {
+      const author = await this.userModel.findOne({ publicId: authorPublicId });
+
+      const posts = await this.blogPostModel
+        .find({
+          author: author._id,
+          deleted: false
+        })
+        .populate('author', 'publicId name username')
+        .sort({ creationDate: -1 })
+        .exec();
+
+
+      return posts;
+    } catch (error) {
+      throw new BadRequestException('Error al obtener los posts del autor');
+    }
   }
 
   /**

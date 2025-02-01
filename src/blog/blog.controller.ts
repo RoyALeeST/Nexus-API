@@ -1,56 +1,80 @@
 import {
   Body,
   Controller,
+  Delete,
+  Get,
   NotFoundException,
+  Param,
   Post,
+  Put,
+  Req,
   UseGuards,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { BlogService } from './blog.service';
 import { Public } from '@decorators/public.decorator';
 import { AuthGuard } from 'auth/auth.guard';
-import { BlogPost } from './models/BlogPost.model';
+import { User } from 'auth/users/user.schema';
+import { BlogPostResponseDto, BlogPostsByAuthorRequestDto, CreateBlogPostDto, UpdateBlogPostDto } from './dtos/blogpost.dto';
 
 @Controller('blog')
 export class BlogController {
   constructor(private readonly blogService: BlogService) {}
 
-  @Post('all')
+  @Get()
   @Public()
-  getPosts() {
-    return this.blogService.getPosts();
+  async getPosts(): Promise<BlogPostResponseDto[]> {
+    const posts = await this.blogService.getPosts();
+    return posts.map(BlogPostResponseDto.fromDocument);
   }
 
-  @Post('create-post')
+  @Post()
   @UseGuards(AuthGuard)
-  createPost(@Body() post: BlogPost) {
-    return this.blogService.createPost(post);
+  async createPost(
+    @Req() req: Request & { locals: { user: User } },
+    @Body() createPostDto: CreateBlogPostDto
+  ): Promise<BlogPostResponseDto> {
+    createPostDto.author = req.locals.user;
+    const createdPost = await this.blogService.createPost(createPostDto);
+    return BlogPostResponseDto.fromDocument(createdPost);
   }
 
-  @Post('update-post')
+  @Put(':id')
   @UseGuards(AuthGuard)
-  updatePost(@Body() post: BlogPost) {
-    return this.blogService.updatePost(post.publicId, post);
+  async updatePost(
+    @Param('id') id: string,
+    @Req() req: Request & { locals: { user: User } },
+    @Body() updatePostDto: UpdateBlogPostDto
+  ): Promise<BlogPostResponseDto> {
+    const updatedPost = await this.blogService.updatePost(id, req.locals.user._id, updatePostDto);
+    return BlogPostResponseDto.fromDocument(updatedPost);
   }
 
-  @Post('delete-post')
+  @Delete(':id')
   @UseGuards(AuthGuard)
-  deletePost(@Body() post: BlogPost) {
-    return this.blogService.deletePost(post.publicId);
+  // TODO: Add middleware to verify if the user making the request is an admin.
+  async deletePost(
+    @Param('id') id: string,
+    @Req() req: Request & { locals: { user: User } }
+  ): Promise<void> {
+    await this.blogService.deletePost(id, req.locals.user._id);
   }
 
-  @Post('get-post-by-id')
+  @Get(':id')
   @Public()
-  async getPostById(@Body() post: BlogPost) {
-    const postInDb = await this.blogService.getPostById(post.publicId);
-    if (!postInDb) {
-      throw new NotFoundException('Post not found');
-    }
-    return postInDb;
+  async getPostById(
+    @Param('id') id: string
+  ): Promise<BlogPostResponseDto> {
+    const post = await this.blogService.getPostById(id);
+    return BlogPostResponseDto.fromDocument(post);
   }
 
-  @Post('get-posts-by-author')
+  @Get('author/:authorPublicId')
   @Public()
-  getPostsByAuthor(@Body() post: BlogPost) {
-    return this.blogService.getPostsByAuthor(post.author);
+  async getPostsByAuthor(
+    @Param('authorPublicId') authorPublicId: string
+  ): Promise<BlogPostResponseDto[]> {
+    const posts = await this.blogService.getPostsByAuthor(authorPublicId);
+    return posts.map(BlogPostResponseDto.fromDocument);
   }
 }

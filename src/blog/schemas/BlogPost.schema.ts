@@ -1,15 +1,17 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import { Document, HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 import { v4 as uuid } from 'uuid';
+import { User } from 'auth/users/user.schema';
 
 export type BlogPostDocument = HydratedDocument<BlogPost>;
 
 @Schema()
-export class BlogPost {
+export class BlogPost extends Document<MongooseSchema.Types.ObjectId> {
   @Prop({
     required: true,
     unique: true,
     default: function genUUID() {
+
       return uuid();
     },
   })
@@ -21,17 +23,17 @@ export class BlogPost {
   @Prop()
   content: string;
 
-  @Prop()
-  author: string;
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User' })
+  author: User;
 
   @Prop({ default: 0 })
-  rating: number;
+  rating?: number;
 
   @Prop({ default: false })
-  deleted: boolean;
+  deleted?: boolean;
 
   @Prop({ default: new Date() })
-  creationDate: string;
+  creationDate?: string;
 }
 
 export const BlogPostSchema = SchemaFactory.createForClass(BlogPost);

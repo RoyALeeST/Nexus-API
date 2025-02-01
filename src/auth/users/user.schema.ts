@@ -1,16 +1,20 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import { HydratedDocument, Document, Types } from 'mongoose';
 import { Role } from 'utils/enums/roles.enum';
 import { v4 as uuid } from 'uuid';
+
 
 export type UserDocument = HydratedDocument<User>;
 
 @Schema()
-export class User {
+export class User extends Document<Types.ObjectId> {
   @Prop({
     required: true,
+
     unique: true,
     default: function genUUID() {
+
+
       return uuid();
     },
   })
