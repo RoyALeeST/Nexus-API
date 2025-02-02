@@ -1,10 +1,12 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Post,
   Req,
+  Res,
   Response,
   UseGuards,
 } from '@nestjs/common';
@@ -15,6 +17,9 @@ import { AuthGuard } from './auth.guard';
 import { Roles } from '@decorators/roles.decorator';
 import { Role } from 'utils/enums/roles.enum';
 import { RolesGuard } from './roles.guard';
+import { LocalAuthGuard } from './guards/local-auth.guard';
+import { User } from './users/user.schema';
+import { CurrentUser } from '@decorators/current-user.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -85,5 +90,21 @@ export class AuthController {
       message: 'Profile fetched successfully',
       data: req.locals.user,
     };
+  }
+
+  @Post('login-cookie')
+  @Public()
+  loginCookie(
+    @Body() body: any,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    return this.authService.login(body, response as any);
+  }
+
+  @Get('test')
+  @UseGuards(AuthGuard)
+  test(@CurrentUser() user: User) {
+    console.log(user);
+    return user;
   }
 }
