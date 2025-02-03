@@ -3,11 +3,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
 import { BlogPost } from './schemas/BlogPost.schema';
-import { CreateBlogPostDto, UpdateBlogPostDto } from './dtos/blogpost.dto';
+import { CreateBlogPostDto } from './dtos/blogpost-create.dto';
+import { IBlogService } from './blog.service.interface';
+import { UpdateBlogPostDto } from './dtos/blogpost-update.dto';
 import { User } from 'auth/users/user.schema';
 
+
 @Injectable()
-export class BlogService {
+export class BlogService implements IBlogService {
   constructor(
     @InjectModel(BlogPost.name) private blogPostModel: Model<BlogPost>,
     @InjectModel(User.name) private userModel: Model<User>,

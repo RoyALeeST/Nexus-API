@@ -1,26 +1,5 @@
 import { BlogPost } from "@blog/schemas/BlogPost.schema";
-import { User } from "auth/users/user.schema";
-import { IsNotEmpty, IsString } from "class-validator";
-import { Types } from "mongoose";
-
-export class CreateBlogPostDto {
-  @IsString()
-  title: string;
-
-  @IsString()
-  content: string;
-
-  author: User;
-}
-
-// Issued with this one
-export class UpdateBlogPostDto {
-  @IsString()
-  title: string;
-
-  @IsString()
-  content: string;
-}
+import { IsString } from "class-validator";
 
 export class BlogPostResponseDto {
   /** Unique identifier for the blog post */
@@ -58,9 +37,4 @@ export class BlogPostResponseDto {
       authorUsername: document.author.username,
     };
   }
-}
-
-export class BlogPostsByAuthorRequestDto {
-  @IsString()
-  authorPublicId: string;
 }
