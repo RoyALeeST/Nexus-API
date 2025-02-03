@@ -15,7 +15,9 @@ import { BlogService } from './blog.service';
 import { Public } from '@decorators/public.decorator';
 import { AuthGuard } from 'auth/auth.guard';
 import { User } from 'auth/users/user.schema';
-import { BlogPostResponseDto, BlogPostsByAuthorRequestDto, CreateBlogPostDto, UpdateBlogPostDto } from './dtos/blogpost.dto';
+import { BlogPostResponseDto } from './dtos/blogpost-response.dto';
+import { CreateBlogPostDto } from './dtos/blogpost-create.dto';
+import { UpdateBlogPostDto } from './dtos/blogpost-update.dto';
 
 @Controller('blog')
 export class BlogController {
