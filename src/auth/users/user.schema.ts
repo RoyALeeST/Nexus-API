@@ -37,6 +37,9 @@ export class User {
   @Prop()
   roles: Role[];
 
+  @Prop()
+  isEmailVerified: boolean;
+
   @Prop({ default: '' })
   accessToken: string;
 
