@@ -27,6 +27,14 @@ export class BlogPostResponseDto {
   @IsString()
   authorUsername: string;
 
+  /** Thumbnail of the blog post */
+  @IsString()
+  thumbnail: string;
+
+  /** Creation date of the blog post */
+  @IsString()
+  creationDate: string;
+
   static fromDocument(document: BlogPost): BlogPostResponseDto {
     return {
       id: document.publicId,
@@ -35,6 +43,9 @@ export class BlogPostResponseDto {
       authorId: document.author.publicId,
       authorName: document.author.name,
       authorUsername: document.author.username,
+      thumbnail: document.thumbnail,
+      creationDate: document.creationDate,
     };
   }
 }
+

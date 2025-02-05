@@ -34,6 +34,9 @@ export class BlogPost extends Document<MongooseSchema.Types.ObjectId> {
 
   @Prop({ default: new Date() })
   creationDate?: string;
+
+  @Prop()
+  thumbnail?: string;
 }
 
 export const BlogPostSchema = SchemaFactory.createForClass(BlogPost);
