@@ -56,6 +56,22 @@ export class AuthController {
   }
 
   /**
+   * Registers a new user account
+   * @param body - Request body containing registration details
+   * @returns Object containing success message and registered user data
+   */
+  @Post('verify-email')
+  @Public()
+  async verifyEmail(@Body() body: any) {
+    const user = await this.authService.verifyEmail(body);
+
+    return {
+      message: 'Email verified successfully',
+      data: user,
+    };
+  }
+
+  /**
    * Logs out a currently authenticated user
    * @param body - Request body containing logout details
    * @returns Object containing success message and logout data

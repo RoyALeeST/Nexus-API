@@ -41,6 +41,9 @@ export class User extends Document<Types.ObjectId> {
   @Prop()
   roles: Role[];
 
+  @Prop()
+  isEmailVerified: boolean;
+
   @Prop({ default: '' })
   accessToken: string;
 
