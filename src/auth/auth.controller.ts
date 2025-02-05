@@ -17,9 +17,9 @@ import { AuthGuard } from './auth.guard';
 import { Roles } from '@decorators/roles.decorator';
 import { Role } from 'utils/enums/roles.enum';
 import { RolesGuard } from './roles.guard';
-import { LocalAuthGuard } from './guards/local-auth.guard';
 import { User } from './users/user.schema';
 import { CurrentUser } from '@decorators/current-user.decorator';
+import { UserResponseDto } from './users/userResponse.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -51,6 +51,22 @@ export class AuthController {
     const user = await this.authService.register(body);
     return {
       message: 'Register successful',
+      data: user,
+    };
+  }
+
+  /**
+   * Registers a new user account
+   * @param body - Request body containing registration details
+   * @returns Object containing success message and registered user data
+   */
+  @Post('verify-email')
+  @Public()
+  async verifyEmail(@Body() body: any) {
+    const user = await this.authService.verifyEmail(body);
+
+    return {
+      message: 'Email verified successfully',
       data: user,
     };
   }
@@ -106,5 +122,11 @@ export class AuthController {
   test(@CurrentUser() user: User) {
     console.log(user);
     return user;
+  }
+
+  @Get('self')
+  @UseGuards(AuthGuard)
+  self(@CurrentUser() user: User) {
+    return UserResponseDto.fromSchema(user);
   }
 }

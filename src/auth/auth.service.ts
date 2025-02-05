@@ -7,7 +7,9 @@ import { UsersService } from './users/users.service';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
-const ms = require('ms');
+import { Role } from 'utils/enums/roles.enum';
+import ms from 'ms';
+import { MailService } from 'mail/mail.service';
 
 @Injectable()
 export class AuthService {
@@ -20,6 +22,7 @@ export class AuthService {
     private usersService: UsersService,
     private readonly configService: ConfigService,
     private jwtService: JwtService,
+    private mailService: MailService,
   ) {}
 
   /**
@@ -36,7 +39,30 @@ export class AuthService {
     if (!isMatch) {
       throw new UnauthorizedException();
     }
-    return this.userModel.create(user);
+
+    //TODO: add role to user
+    user.roles = [Role.User, Role.Regular];
+    //TODO: add email verification
+    user.isEmailVerified = false;
+    const emailSent = await this.mailService.sendEmail(
+      user.email,
+      'Welcome to Master Bet',
+      'Welcome to Master Bet',
+    );
+    console.log(emailSent);
+
+    const newUser = await this.userModel.create(user);
+
+    return newUser;
+  }
+
+  async verifyEmail(userToVeify: User): Promise<User> {
+    const user = await this.userModel.findOne({ email: userToVeify.email });
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+    user.isEmailVerified = true;
+    return this.userModel.findByIdAndUpdate(user._id, user, { new: true });
   }
 
   /**
@@ -44,6 +70,7 @@ export class AuthService {
    * @param email - User's email address
    * @param password - User's password
    * @returns Promise resolving to the authenticated User or null if not found
+
    */
   async signIn(email: string, pass: string): Promise<{ accessToken: string }> {
     const user = await this.usersService.findOne(email);
@@ -136,7 +163,8 @@ export class AuthService {
         throw new UnauthorizedException();
       }
       return user;
-    } catch (err) {
+    } catch (error) {
+      console.log(error);
       throw new UnauthorizedException('Credentials are not valid.');
     }
   }

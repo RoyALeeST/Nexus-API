@@ -8,5 +8,8 @@ export class CreateBlogPostDto {
   @IsString()
   content: string;
 
+  @IsString()
+  thumbnail: string;
+  
   author: User;
 }
