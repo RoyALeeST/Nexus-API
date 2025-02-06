@@ -4,13 +4,14 @@ import {
   MiddlewareConsumer,
   RequestMethod,
 } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
+import { JwtModule } from '@nestjs/jwt';
+
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthController } from './auth/auth.controller';
-import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
-import { JwtModule } from '@nestjs/jwt';
-import { AuthenticationMiddleware } from './auth/auth.middleware';
+import { AuthenticationMiddleware } from 'auth/auth.middleware';
 import { BlogController } from 'blog/blog.controller';
 import { BlogModule } from 'blog/blog.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -22,6 +23,7 @@ import { UsersModule } from 'auth/users/user.module';
 
 @Module({
   imports: [
+    AuthModule,
     JwtModule.register({
       secret: 'secret',
       signOptions: { expiresIn: '1h' },
@@ -71,8 +73,9 @@ export class AppModule implements NestModule {
         { path: 'auth/login', method: RequestMethod.POST },
         { path: 'auth/register', method: RequestMethod.POST },
         { path: 'auth/login-cookie', method: RequestMethod.POST },
-        { path: 'blog/get-post-by-id', method: RequestMethod.POST },
-        { path: 'blog/get-posts-by-author', method: RequestMethod.POST },
+        { path: 'blog', method: RequestMethod.GET },
+        { path: 'blog/:id', method: RequestMethod.GET },
+        { path: 'blog/author/:authorPublicId', method: RequestMethod.GET },
         { path: 'verification/code', method: RequestMethod.POST },
       )
       .forRoutes(AuthController, BlogController, VerificationController);

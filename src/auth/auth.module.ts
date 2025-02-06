@@ -43,6 +43,9 @@ import { MailService } from 'mail/mail.service';
     LocalStrategy,
     JwtStrategy,
   ],
-  exports: [AuthService],
+  exports: [
+    AuthService,
+    JwtModule,
+  ],
 })
 export class AuthModule {}
