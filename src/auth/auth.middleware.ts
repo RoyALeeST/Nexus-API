@@ -37,9 +37,11 @@ export class AuthenticationMiddleware implements NestMiddleware {
         throw new UnauthorizedException('Autorizacion Invalida', error.message);
       }
     } else {
-      throw new UnauthorizedException('Autorizacion Invalida', 'Token inexistente');
+      throw new UnauthorizedException(
+        'Autorizacion Invalida',
+        'Token inexistente',
+      );
     }
-    throw new UnauthorizedException('Autorizacion Invalida');
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {

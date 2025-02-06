@@ -40,6 +40,9 @@ export class User {
   @Prop()
   isEmailVerified: boolean;
 
+  @Prop()
+  emailVerificationCode: number;
+
   @Prop({ default: '' })
   accessToken: string;
 
