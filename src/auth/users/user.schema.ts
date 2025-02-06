@@ -44,6 +44,9 @@ export class User extends Document<Types.ObjectId> {
   @Prop()
   isEmailVerified: boolean;
 
+  @Prop()
+  emailVerificationCode: number;
+
   @Prop({ default: '' })
   accessToken: string;
 
