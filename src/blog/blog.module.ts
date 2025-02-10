@@ -16,8 +16,7 @@ import { AuthModule } from 'auth/auth.module';
     AuthModule,
   ],
   controllers: [BlogController],
-
   providers: [BlogService],
-  exports: [BlogService],
+  exports: [BlogService, MongooseModule],
 })
 export class BlogModule {}

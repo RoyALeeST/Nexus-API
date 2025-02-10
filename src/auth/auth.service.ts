@@ -8,8 +8,9 @@ import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 import { Role } from 'utils/enums/roles.enum';
-import ms from 'ms';
 import { MailService } from 'mail/mail.service';
+
+const ms = require('ms');
 
 @Injectable()
 export class AuthService {

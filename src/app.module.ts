@@ -16,6 +16,8 @@ import { BlogController } from 'blog/blog.controller';
 import { BlogModule } from 'blog/blog.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
+import { CommentController } from '@blog/comment/comment.controller';
+import { CommentModule } from '@blog/comment/comment.module';
 
 @Module({
   imports: [
@@ -50,9 +52,11 @@ import { LoggerModule } from 'nestjs-pino';
     MongooseModule.forRoot(process.env.DATABASE_URL),
     AuthModule,
     BlogModule,
+    CommentModule,
   ],
   controllers: [AppController, AuthController, BlogController],
   providers: [AppService],
+
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
@@ -66,7 +70,7 @@ export class AppModule implements NestModule {
         { path: 'blog/:id', method: RequestMethod.GET },
         { path: 'blog/author/:authorPublicId', method: RequestMethod.GET },
       )
-      .forRoutes(AuthController, BlogController);
+      .forRoutes(AuthController, BlogController, CommentController);
 
   }
 }
