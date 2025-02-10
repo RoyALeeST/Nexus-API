@@ -19,6 +19,7 @@ import { Role } from 'utils/enums/roles.enum';
 import { RolesGuard } from './roles.guard';
 import { User } from './users/user.schema';
 import { CurrentUser } from '@decorators/current-user.decorator';
+import { UserResponseDto } from './users/userResponse.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -109,5 +110,11 @@ export class AuthController {
   test(@CurrentUser() user: User) {
     console.log(user);
     return user;
+  }
+
+  @Get('self')
+  @UseGuards(AuthGuard)
+  self(@CurrentUser() user: User) {
+    return UserResponseDto.fromSchema(user);
   }
 }

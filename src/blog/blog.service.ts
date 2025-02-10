@@ -144,6 +144,7 @@ export class BlogService implements IBlogService {
       const post = await this.blogPostModel
         .findOne({ publicId: id, deleted: false })
         .populate('author', 'publicId name username')
+        .populate('comments.author', 'publicId name username')
         .exec();
 
       if (!post) {

@@ -16,6 +16,8 @@ import { BlogController } from 'blog/blog.controller';
 import { BlogModule } from 'blog/blog.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
+import { CommentController } from '@blog/comment/comment.controller';
+import { CommentModule } from '@blog/comment/comment.module';
 import { VerificationController } from './verification/verification.controller';
 import { VerificationService } from './verification/verification.service';
 import { VerificationModule } from './verification/verification.module';
@@ -54,6 +56,7 @@ import { UsersModule } from 'auth/users/user.module';
     MongooseModule.forRoot(process.env.DATABASE_URL),
     AuthModule,
     BlogModule,
+    CommentModule,
     UsersModule,
     VerificationModule,
   ],
@@ -64,6 +67,7 @@ import { UsersModule } from 'auth/users/user.module';
     VerificationController,
   ],
   providers: [AppService, VerificationService],
+
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
@@ -78,6 +82,11 @@ export class AppModule implements NestModule {
         { path: 'blog/author/:authorPublicId', method: RequestMethod.GET },
         { path: 'verification/code', method: RequestMethod.POST },
       )
-      .forRoutes(AuthController, BlogController, VerificationController);
+      .forRoutes(
+        AuthController,
+        BlogController,
+        CommentController,
+        VerificationController,
+      );
   }
 }
