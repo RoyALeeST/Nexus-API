@@ -23,8 +23,8 @@ export class Comment extends Document<MongooseSchema.Types.ObjectId> {
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User' })
   author: User;
 
-  @Prop({ default: new Date() })
-  creationDate?: string;
+  @Prop({ type: Date, default: Date.now })
+  creationDate?: Date;
 
   @Prop({ default: false })
   deleted: boolean;

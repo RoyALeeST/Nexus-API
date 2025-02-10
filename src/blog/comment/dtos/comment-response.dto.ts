@@ -1,4 +1,4 @@
-import { IsString } from "class-validator";
+import { IsString, IsDate } from "class-validator";
 import { Comment } from "../schemas/comment.schema";
 
 export class CommentResponseDto {
@@ -17,8 +17,8 @@ export class CommentResponseDto {
   @IsString()
   authorUsername: string;
 
-  @IsString()
-  creationDate: string;
+  @IsDate()
+  creationDate: Date;
 
   static fromDocument(document: Comment): CommentResponseDto {
     return {
