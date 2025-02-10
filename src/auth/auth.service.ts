@@ -1,9 +1,13 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User } from './users/user.schema';
 import { JwtService } from '@nestjs/jwt';
-import { UsersService } from './users/users.service';
+import { UserService } from './users/users.service';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
@@ -20,7 +24,7 @@ export class AuthService {
    */
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
-    private usersService: UsersService,
+    private UserService: UserService,
     private readonly configService: ConfigService,
     private jwtService: JwtService,
     private mailService: MailService,
@@ -31,41 +35,39 @@ export class AuthService {
    * @param user - User data to register
    * @returns Promise resolving to the created User
    */
-  async register(user: User): Promise<User> {
+  async register(user: User, response: Response): Promise<User> {
+    const existingUser = await this.userModel.findOne({ email: user.email });
+    if (existingUser) {
+      throw new BadRequestException('User already exists');
+    }
     const saltRounds = 10;
     const salt = await bcrypt.genSalt(saltRounds);
     const hash = await bcrypt.hash(user.password, salt);
     const isMatch = await bcrypt.compare(user.password, hash);
     user.password = hash;
+
     if (!isMatch) {
       throw new UnauthorizedException();
     }
 
-    //TODO: add role to user
     user.roles = [Role.User, Role.Regular];
-    //TODO: add email verification
     user.isEmailVerified = false;
-    const emailSent = await this.mailService.sendEmail(
-      user.email,
-      'Welcome to Master Bet',
-      'Welcome to Master Bet',
-    );
-    console.log(emailSent);
+    user.emailVerificationCode = Math.floor(100000 + Math.random() * 900000);
 
-    const newUser = await this.userModel.create(user);
+    try {
+      await this.mailService.sendEmail(
+        user.email,
+        'Welcome to Master Bet',
+        'Este es tu código de verificación: ' + user.emailVerificationCode,
+      );
 
-    return newUser;
-  }
+      const newUser = await this.userModel.create(user);
 
-  async verifyEmail(userToVeify: User): Promise<User> {
-    const user = await this.userModel.findOne({ email: userToVeify.email });
-    if (!user) {
-      throw new UnauthorizedException();
+      return newUser;
+    } catch (error) {
+      console.log(error);
     }
-    user.isEmailVerified = true;
-    return this.userModel.findByIdAndUpdate(user._id, user, { new: true });
   }
-
   /**
    * Authenticates a user with email and password
    * @param email - User's email address
@@ -74,7 +76,7 @@ export class AuthService {
 
    */
   async signIn(email: string, pass: string): Promise<{ accessToken: string }> {
-    const user = await this.usersService.findOne(email);
+    const user = await this.UserService.findOne(email);
     const isMatch = await bcrypt.compare(pass, user?.password);
     if (!isMatch) {
       throw new UnauthorizedException();
@@ -87,7 +89,7 @@ export class AuthService {
       throw new UnauthorizedException();
     }
     user.accessToken = accessToken;
-    await this.usersService.updateUser(user.id, user);
+    await this.UserService.updateUser(user.id, user);
     return {
       accessToken: accessToken,
     };
@@ -126,7 +128,7 @@ export class AuthService {
     userData: User,
     response: Response,
   ): Promise<{ accessToken: string }> {
-    const user = await this.usersService.findOne(userData.email);
+    const user = await this.UserService.findOne(userData.email);
     const isMatch = await bcrypt.compare(userData.password, user?.password);
     if (!isMatch) {
       throw new UnauthorizedException();
@@ -139,7 +141,7 @@ export class AuthService {
       throw new UnauthorizedException();
     }
     user.accessToken = accessToken;
-    await this.usersService.updateUser(user.id, user);
+    await this.UserService.updateUser(user.id, user);
 
     const expires = new Date();
     expires.setMilliseconds(
@@ -158,7 +160,7 @@ export class AuthService {
 
   async verifyUser(email: string, password: string) {
     try {
-      const user = await this.usersService.findOne(email);
+      const user = await this.UserService.findOne(email);
       const authenticated = await bcrypt.compare(password, user?.password);
       if (!authenticated) {
         throw new UnauthorizedException();

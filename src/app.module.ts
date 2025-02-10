@@ -18,6 +18,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
 import { CommentController } from '@blog/comment/comment.controller';
 import { CommentModule } from '@blog/comment/comment.module';
+import { VerificationController } from './verification/verification.controller';
+import { VerificationService } from './verification/verification.service';
+import { VerificationModule } from './verification/verification.module';
+import { UsersModule } from 'auth/users/user.module';
 
 @Module({
   imports: [
@@ -53,9 +57,16 @@ import { CommentModule } from '@blog/comment/comment.module';
     AuthModule,
     BlogModule,
     CommentModule,
+    UsersModule,
+    VerificationModule,
   ],
-  controllers: [AppController, AuthController, BlogController],
-  providers: [AppService],
+  controllers: [
+    AppController,
+    AuthController,
+    BlogController,
+    VerificationController,
+  ],
+  providers: [AppService, VerificationService],
 
 })
 export class AppModule implements NestModule {
@@ -69,8 +80,13 @@ export class AppModule implements NestModule {
         { path: 'blog', method: RequestMethod.GET },
         { path: 'blog/:id', method: RequestMethod.GET },
         { path: 'blog/author/:authorPublicId', method: RequestMethod.GET },
+        { path: 'verification/code', method: RequestMethod.POST },
       )
-      .forRoutes(AuthController, BlogController, CommentController);
-
+      .forRoutes(
+        AuthController,
+        BlogController,
+        CommentController,
+        VerificationController,
+      );
   }
 }
