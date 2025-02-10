@@ -29,10 +29,8 @@ export class MailService {
         text: text,
         html: HTML_TEMPLATE(text),
       });
-      console.log('Message sent: %s', info.messageId);
       return info;
     } catch (error) {
-      console.log(error);
       throw new BadRequestException(error);
     }
   }

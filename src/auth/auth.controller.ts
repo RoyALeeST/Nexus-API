@@ -47,26 +47,14 @@ export class AuthController {
    */
   @Post('register')
   @Public()
-  async register(@Body() body: any) {
-    const user = await this.authService.register(body);
+  async register(
+    @Body() body: any,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const user = await this.authService.register(body, response as any);
+
     return {
       message: 'Register successful',
-      data: user,
-    };
-  }
-
-  /**
-   * Registers a new user account
-   * @param body - Request body containing registration details
-   * @returns Object containing success message and registered user data
-   */
-  @Post('verify-email')
-  @Public()
-  async verifyEmail(@Body() body: any) {
-    const user = await this.authService.verifyEmail(body);
-
-    return {
-      message: 'Email verified successfully',
       data: user,
     };
   }
