@@ -1,11 +1,9 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
   HttpCode,
   HttpStatus,
-  NotFoundException,
   Post,
   Req,
   Res,
@@ -22,7 +20,6 @@ import { RolesGuard } from './roles.guard';
 import { User } from './users/user.schema';
 import { CurrentUser } from '@decorators/current-user.decorator';
 import { UserResponseDto } from './users/userResponse.dto';
-import { AuthRequest } from './interfaces/authRequest.interface';
 
 @Controller('auth')
 export class AuthController {
@@ -31,10 +28,16 @@ export class AuthController {
     private readonly jwtService: JwtService,
   ) {}
 
+  /**
+   * Authenticates a user with their credentials
+   * @param body - Request body containing login credentials
+   * @returns Object containing success message and user data
+   */
+  @HttpCode(HttpStatus.OK)
   @Post('login')
   @Public()
-  login(@Body() body: any, @Res({ passthrough: true }) response: Response) {
-    return this.authService.login(body, response as any);
+  signIn(@Body() signInDto: any) {
+    return this.authService.signIn(signInDto.email, signInDto.password);
   }
 
   /**
@@ -44,12 +47,28 @@ export class AuthController {
    */
   @Post('register')
   @Public()
-  async register(@Body() body: any) {
-    const user = await this.authService.register(body);
+  async register(
+    @Body() body: any,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const user = await this.authService.register(body, response as any);
 
     return {
       message: 'Register successful',
       data: user,
+    };
+  }
+
+  /**
+   * Logs out a currently authenticated user
+   * @param body - Request body containing logout details
+   * @returns Object containing success message and logout data
+   */
+  @Post('logout')
+  logout(@Body() body: any) {
+    return {
+      message: 'Logout successful',
+      data: body,
     };
   }
 
@@ -59,31 +78,38 @@ export class AuthController {
    * @returns Object containing success message and reset request data
    */
   @Post('forgot-password')
-  @Public()
-  async forgotPassword(@Body() body: any) {
-    try {
-      const { email } = body;
-      await this.authService.forgotPassword(email);
-    } catch (error) {
-      throw new BadRequestException('Error sending email');
-    }
-
+  forgotPassword(@Body() body: any) {
     return {
-      message: 'Password reset email sent',
+      message: 'Forgot password successful',
+      data: body,
     };
   }
 
-  @Post('password-reset')
+  @Post('profile')
   @UseGuards(AuthGuard)
-  passwordReset(@Body() body: AuthRequest) {
-    try {
-      const user = this.authService.resetPassword(body);
-      return {
-        message: 'Password reset successful',
-      };
-    } catch (error) {
-      throw new BadRequestException('Error resetting password');
-    }
+  @Roles(Role.Admin)
+  @UseGuards(RolesGuard)
+  async getProfile(@Body() body: Record<string, any>, @Req() req: any) {
+    return {
+      message: 'Profile fetched successfully',
+      data: req.locals.user,
+    };
+  }
+
+  @Post('login-cookie')
+  @Public()
+  loginCookie(
+    @Body() body: any,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    return this.authService.login(body, response as any);
+  }
+
+  @Get('test')
+  @UseGuards(AuthGuard)
+  test(@CurrentUser() user: User) {
+    console.log(user);
+    return user;
   }
 
   @Get('self')

@@ -7,14 +7,12 @@ import { Request, Response, NextFunction } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import { jwtConstants } from './constants';
 import { AuthService } from './auth.service';
-import { UserService } from './users/users.service';
 
 @Injectable()
 export class AuthenticationMiddleware implements NestMiddleware {
   constructor(
     private jwtService: JwtService,
     private readonly authService: AuthService,
-    private readonly userService: UserService,
   ) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
@@ -27,7 +25,7 @@ export class AuthenticationMiddleware implements NestMiddleware {
         if (this.authService.isTokenExpired(payload)) {
           throw new UnauthorizedException('Token Expirado');
         }
-        const user = await this.userService.findByEmail(payload.email);
+        const user = await this.authService.findUserByEmail(payload.email);
         if (!user) {
           throw new UnauthorizedException('Usuario no encontrado');
         }

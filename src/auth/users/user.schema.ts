@@ -1,9 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Document, Types } from 'mongoose';
 import { Role } from 'utils/enums/roles.enum';
-import { UserCodesDetails } from './interfaces/useCodesDetails.interface';
 import { v4 as uuid } from 'uuid';
-import { UserVerificationDetails } from './interfaces/userVerificationDeatils.interface';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -11,6 +9,7 @@ export type UserDocument = HydratedDocument<User>;
 export class User extends Document<Types.ObjectId> {
   @Prop({
     required: true,
+
     unique: true,
     default: function genUUID() {
       return uuid();
@@ -47,15 +46,6 @@ export class User extends Document<Types.ObjectId> {
 
   @Prop({ default: '' })
   accessToken: string;
-
-  @Prop({ default: '' })
-  refreshToken: string;
-
-  @Prop({ type: Object, default: {} })
-  userCodesDetails: UserCodesDetails;
-
-  @Prop({ type: Object, default: {} })
-  userVerificationDetails: UserVerificationDetails;
 
   @Prop({ default: new Date() })
   creationDate: string;

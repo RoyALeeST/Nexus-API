@@ -30,6 +30,7 @@ import { UsersModule } from 'auth/users/user.module';
       secret: 'secret',
       signOptions: { expiresIn: '1h' },
     }),
+
     LoggerModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => {
@@ -69,19 +70,17 @@ import { UsersModule } from 'auth/users/user.module';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    const publicRoutes = [
-      { path: 'auth/login', method: RequestMethod.POST },
-      { path: 'auth/register', method: RequestMethod.POST },
-      { path: 'auth/forgot-password', method: RequestMethod.POST },
-      { path: 'blog', method: RequestMethod.GET },
-      { path: 'blog/:id', method: RequestMethod.GET },
-      { path: 'blog/author/:authorPublicId', method: RequestMethod.GET },
-      { path: 'verification/code', method: RequestMethod.POST },
-    ];
-
     consumer
       .apply(AuthenticationMiddleware)
-      .exclude(...publicRoutes)
+      .exclude(
+        { path: 'auth/login', method: RequestMethod.POST },
+        { path: 'auth/register', method: RequestMethod.POST },
+        { path: 'auth/login-cookie', method: RequestMethod.POST },
+        { path: 'blog', method: RequestMethod.GET },
+        { path: 'blog/:id', method: RequestMethod.GET },
+        { path: 'blog/author/:authorPublicId', method: RequestMethod.GET },
+        { path: 'verification/code', method: RequestMethod.POST },
+      )
       .forRoutes(
         AuthController,
         BlogController,
