@@ -1,0 +1,11 @@
+{
+  "configurations": [
+    {
+      "type": "node-terminal",
+      "name": "NestJS: Debug",
+      "request": "launch",
+      "command": "npm run start:dev",
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}
