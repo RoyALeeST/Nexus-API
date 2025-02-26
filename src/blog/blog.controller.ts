@@ -13,7 +13,7 @@ import { Request } from 'express';
 import { BlogService } from './blog.service';
 import { Public } from '@decorators/public.decorator';
 import { AuthGuard } from 'auth/auth.guard';
-import { User } from 'auth/user/user.schema';
+import { User } from 'auth/user/schema/user.schema';
 import { BlogPostResponseDto } from './dtos/blogpost-response.dto';
 import { CreateBlogPostDto } from './dtos/blogpost-create.dto';
 import { UpdateBlogPostDto } from './dtos/blogpost-update.dto';
@@ -72,12 +72,12 @@ export class BlogController {
     return BlogPostResponseDto.fromDocument(post);
   }
 
-  @Get('author/:authorPublicId')
+  @Get('author/:authoruserId')
   @Public()
   async getPostsByAuthor(
-    @Param('authorPublicId') authorPublicId: string,
+    @Param('authoruserId') authoruserId: string,
   ): Promise<BlogPostResponseDto[]> {
-    const posts = await this.blogService.getPostsByAuthor(authorPublicId);
+    const posts = await this.blogService.getPostsByAuthor(authoruserId);
     return posts.map(BlogPostResponseDto.fromDocument);
   }
 }

@@ -1,11 +1,11 @@
-import { UserSchema } from 'auth/user/user.schema';
+import { UserSchema } from 'auth/user/schema/user.schema';
 
 import { BusinessSchema } from 'business/schema/business.schema';
 
 import { ProductSchema } from 'product/model/product.schema';
 
 import { MongooseModule } from '@nestjs/mongoose';
-import { User } from 'auth/user/user.schema';
+import { User } from 'auth/user/schema/user.schema';
 import { UserController } from 'auth/user/controller/user.controller';
 import { UserService } from 'auth/user/service/user.service';
 import { Business } from 'business/schema/business.schema';
@@ -18,7 +18,11 @@ import { ProductController } from 'product/controller/productController';
 import { BusinessService } from 'business/service/business.service';
 import { BusinessController } from 'business/controller/business.controller';
 import { SaleController } from 'sales/controller/sale.controller';
-
+import {
+  ProductData,
+  ProductDataSchema,
+} from 'product/model/productData.schema';
+import { JwtService } from '@nestjs/jwt';
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
@@ -26,6 +30,9 @@ import { SaleController } from 'sales/controller/sale.controller';
       { name: Business.name, schema: BusinessSchema },
     ]),
     MongooseModule.forFeature([{ name: Product.name, schema: ProductSchema }]),
+    MongooseModule.forFeature([
+      { name: ProductData.name, schema: ProductDataSchema },
+    ]),
     MongooseModule.forFeature([{ name: Sale.name, schema: SaleSchema }]),
   ],
   controllers: [
@@ -34,6 +41,12 @@ import { SaleController } from 'sales/controller/sale.controller';
     ProductController,
     SaleController,
   ],
-  providers: [UserService, BusinessService, ProductService, SaleService],
+  providers: [
+    UserService,
+    BusinessService,
+    ProductService,
+    SaleService,
+    JwtService,
+  ],
 })
 export class InventoryModule {}

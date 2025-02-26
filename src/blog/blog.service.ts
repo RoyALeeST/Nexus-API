@@ -11,7 +11,7 @@ import { BlogPost } from './schemas/BlogPost.schema';
 import { CreateBlogPostDto } from './dtos/blogpost-create.dto';
 import { IBlogService } from './blog.service.interface';
 import { UpdateBlogPostDto } from './dtos/blogpost-update.dto';
-import { User } from 'auth/user/user.schema';
+import { User } from 'auth/user/schema/user.schema';
 
 @Injectable()
 export class BlogService implements IBlogService {
@@ -28,7 +28,7 @@ export class BlogService implements IBlogService {
     try {
       return await this.blogPostModel
         .find({ deleted: false })
-        .populate('author', 'publicId name username')
+        .populate('author', 'userId name username')
         .sort({ creationDate: -1 })
         .exec();
     } catch (error) {
@@ -44,7 +44,7 @@ export class BlogService implements IBlogService {
   async createPost(createPostDto: CreateBlogPostDto): Promise<BlogPost> {
     try {
       const newPost = await this.blogPostModel.create(createPostDto);
-      return newPost.populate('author', 'publicId name username');
+      return newPost.populate('author', 'userId name username');
     } catch (error) {
       throw new BadRequestException('Error al crear el post');
     }
@@ -64,7 +64,7 @@ export class BlogService implements IBlogService {
   ): Promise<BlogPost> {
     try {
       const post = await this.blogPostModel
-        .findOne({ publicId: id })
+        .findOne({ userId: id })
         .populate('author', '_id');
 
       if (!post) {
@@ -79,7 +79,7 @@ export class BlogService implements IBlogService {
 
       const updatedPost = await this.blogPostModel
         .findOneAndUpdate(
-          { publicId: id },
+          { userId: id },
           {
             $set: {
               title: updatePostDto.title,
@@ -88,7 +88,7 @@ export class BlogService implements IBlogService {
           },
           { new: true },
         )
-        .populate('author', 'publicId name username');
+        .populate('author', 'userId name username');
 
       if (!updatedPost) {
         throw new NotFoundException('El post no fue actualizado');
@@ -115,7 +115,7 @@ export class BlogService implements IBlogService {
   async deletePost(id: string, userId: Types.ObjectId): Promise<void> {
     try {
       const postToDelete = await this.blogPostModel
-        .findOne({ publicId: id, deleted: false })
+        .findOne({ userId: id, deleted: false })
         .populate('author', '_id')
         .exec();
 
@@ -127,7 +127,7 @@ export class BlogService implements IBlogService {
 
       const deleteResult = await this.blogPostModel
         .findOneAndUpdate(
-          { publicId: id, deleted: false },
+          { userId: id, deleted: false },
           { $set: { deleted: true } },
         )
         .exec();
@@ -153,9 +153,9 @@ export class BlogService implements IBlogService {
   async getPostById(id: string): Promise<BlogPost> {
     try {
       const post = await this.blogPostModel
-        .findOne({ publicId: id, deleted: false })
-        .populate('author', 'publicId name username')
-        .populate('comments.author', 'publicId name username')
+        .findOne({ userId: id, deleted: false })
+        .populate('author', 'userId name username')
+        .populate('comments.author', 'userId name username')
         .exec();
 
       if (!post) {
@@ -173,19 +173,19 @@ export class BlogService implements IBlogService {
 
   /**
    * Retrieves all blog posts by a specific author
-   * @param {string} authorPublicId - Author public ID to filter by
+   * @param {string} authoruserId - Author public ID to filter by
    * @returns {Promise<BlogPost[]>} Array of matching blog posts
    */
-  async getPostsByAuthor(authorPublicId: string): Promise<BlogPost[]> {
+  async getPostsByAuthor(authoruserId: string): Promise<BlogPost[]> {
     try {
-      const author = await this.userModel.findOne({ publicId: authorPublicId });
+      const author = await this.userModel.findOne({ userId: authoruserId });
 
       const posts = await this.blogPostModel
         .find({
           author: author._id,
           deleted: false,
         })
-        .populate('author', 'publicId name username')
+        .populate('author', 'userId name username')
         .sort({ creationDate: -1 })
         .exec();
 

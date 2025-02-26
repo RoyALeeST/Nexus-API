@@ -6,7 +6,7 @@ import { BlogModule } from '../blog.module';
 import { Comment, CommentSchema } from './schemas/comment.schema';
 import { CommentController } from './comment.controller';
 import { CommentService } from './comment.service';
-import { UsersModule } from 'auth/user/user.module';
+import { UsersModule } from 'auth/user/module/user.module';
 
 @Module({
   imports: [

@@ -3,7 +3,7 @@ import { CommentService } from './comment.service';
 import { CommentCreateDto } from './dtos/comment-create.dto';
 import { AuthGuard } from 'auth/auth.guard';
 import { CurrentUser } from '@decorators/current-user.decorator';
-import { User } from 'auth/user/user.schema';
+import { User } from 'auth/user/schema/user.schema';
 import { CommentResponseDto } from './dtos/comment-response.dto';
 
 @Controller('blog/:blogId/comments')

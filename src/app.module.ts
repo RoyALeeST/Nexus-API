@@ -21,7 +21,7 @@ import { CommentModule } from '@blog/comment/comment.module';
 import { VerificationController } from './verification/verification.controller';
 import { VerificationService } from './verification/verification.service';
 import { VerificationModule } from './verification/verification.module';
-import { UsersModule } from 'auth/user/user.module';
+import { UsersModule } from 'auth/user/module/user.module';
 import { ProductModule } from './product/module/product.module';
 import { AIInsightModule } from './AI/module/ai.module';
 import { InventoryModule } from './inventory/module/inventory.module';
@@ -82,7 +82,7 @@ export class AppModule implements NestModule {
         { path: 'auth/login-cookie', method: RequestMethod.POST },
         { path: 'blog', method: RequestMethod.GET },
         { path: 'blog/:id', method: RequestMethod.GET },
-        { path: 'blog/author/:authorPublicId', method: RequestMethod.GET },
+        { path: 'blog/author/:authoruserId', method: RequestMethod.GET },
         { path: 'verification/code', method: RequestMethod.POST },
       )
       .forRoutes(

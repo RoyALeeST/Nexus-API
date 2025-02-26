@@ -1,5 +1,5 @@
-import { IsString, IsDate } from "class-validator";
-import { Comment } from "../schemas/comment.schema";
+import { IsString, IsDate } from 'class-validator';
+import { Comment } from '../schemas/comment.schema';
 
 export class CommentResponseDto {
   @IsString()
@@ -13,7 +13,7 @@ export class CommentResponseDto {
 
   @IsString()
   authorName: string;
-  
+
   @IsString()
   authorUsername: string;
 
@@ -22,13 +22,12 @@ export class CommentResponseDto {
 
   static fromDocument(document: Comment): CommentResponseDto {
     return {
-      id: document.publicId,
+      id: document.userId,
       content: document.content,
-      authorId: document.author.publicId,
+      authorId: document.author.userId,
       authorName: document.author.name,
       authorUsername: document.author.username,
       creationDate: document.creationDate,
     };
   }
 }
-

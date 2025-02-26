@@ -1,28 +1,57 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { BusinessService } from '../service/business.service';
-import { Business } from '../schema/business.schema';
-
+import { CreateBusinessDto } from 'business/dto/create-business.dto';
+import { UpdateBusinessDto } from 'business/dto/update-business.dto';
+import { BusinessResponseDto } from 'business/dto/business-response.dto';
+import { AuthGuard } from 'auth/auth.guard';
 @Controller('business')
 export class BusinessController {
   constructor(private readonly businessService: BusinessService) {}
 
   @Post()
-  async createBusiness(@Body() data: any): Promise<Business> {
-    return this.businessService.createBusiness(data);
+  @UseGuards(AuthGuard)
+  create(@Body() createBusinessDto: CreateBusinessDto) {
+    return this.businessService.createBusiness(createBusinessDto);
   }
 
-  @Get(':id')
-  async getBusinessById(@Param('id') id: string): Promise<Business> {
-    return this.businessService.getBusinessById(id);
+  @Get('user/:userId')
+  @UseGuards(AuthGuard)
+  async getBusinessesForUser(
+    @Param('userId') userId: string,
+  ): Promise<BusinessResponseDto[]> {
+    return this.businessService.getBusinessesForUser(userId);
   }
 
-  @Get(':id/products')
-  async getBusinessProducts(@Param('id') id: string): Promise<Business> {
-    return this.businessService.getBusinessProducts(id);
+  @Post(':id')
+  @UseGuards(AuthGuard)
+  update(
+    @Param('id') id: string,
+    @Body() updateBusinessDto: UpdateBusinessDto,
+  ) {
+    return this.businessService.updateBusiness(id, updateBusinessDto);
   }
 
-  @Get(':id/sales')
-  async getBusinessSales(@Param('id') id: string): Promise<Business> {
-    return this.businessService.getBusinessSales(id);
+  @Get(':businessId')
+  @UseGuards(AuthGuard)
+  async getBusinessById(
+    @Param('businessId') businessId: string,
+  ): Promise<BusinessResponseDto> {
+    return this.businessService.getBusinessById(businessId);
+  }
+
+  @Get(':businessId/products')
+  @UseGuards(AuthGuard)
+  async getBusinessProducts(
+    @Param('businessId') businessId: string,
+  ): Promise<BusinessResponseDto> {
+    return this.businessService.getBusinessProducts(businessId);
+  }
+
+  @Get(':businessId/sales')
+  @UseGuards(AuthGuard)
+  async getBusinessSales(
+    @Param('businessId') businessId: string,
+  ): Promise<BusinessResponseDto> {
+    return this.businessService.getBusinessSales(businessId);
   }
 }

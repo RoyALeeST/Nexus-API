@@ -1,7 +1,7 @@
-import { CommentResponseDto } from "@blog/comment/dtos/comment-response.dto";
-import { BlogPost } from "@blog/schemas/BlogPost.schema";
-import { IsString, IsArray } from "class-validator";
-import { Comment } from "@blog/comment/schemas/comment.schema";
+import { CommentResponseDto } from '@blog/comment/dtos/comment-response.dto';
+import { BlogPost } from '@blog/schemas/BlogPost.schema';
+import { IsString, IsArray } from 'class-validator';
+import { Comment } from '@blog/comment/schemas/comment.schema';
 
 export class BlogPostResponseDto {
   /** Unique identifier for the blog post */
@@ -44,17 +44,17 @@ export class BlogPostResponseDto {
 
   static fromDocument(document: BlogPost): BlogPostResponseDto {
     return {
-      id: document.publicId,
+      id: document.userId,
       title: document.title,
       content: document.content,
-      authorId: document.author.publicId,
+      authorId: document.author.userId,
       authorName: document.author.name,
       authorUsername: document.author.username,
       thumbnail: document.thumbnail,
       creationDate: document.creationDate,
-      comments: document.comments.map(comment => CommentResponseDto.fromDocument(comment as unknown as Comment)),
+      comments: document.comments.map((comment) =>
+        CommentResponseDto.fromDocument(comment as unknown as Comment),
+      ),
     };
   }
 }
-
-
