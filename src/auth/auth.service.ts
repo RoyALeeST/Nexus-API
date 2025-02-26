@@ -177,4 +177,18 @@ export class AuthService {
       throw new UnauthorizedException('Credentials are not valid.');
     }
   }
+
+  setAuthCookie(response: Response, accessToken: string) {
+    const expires = new Date();
+    expires.setMilliseconds(
+      expires.getMilliseconds() +
+        ms(this.configService.getOrThrow<string>('JWT_EXPIRATION')),
+    );
+
+    response.cookie('Authentication', accessToken, {
+      secure: true,
+      httpOnly: true,
+      expires,
+    });
+  }
 }

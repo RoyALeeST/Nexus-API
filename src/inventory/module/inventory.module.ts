@@ -18,7 +18,10 @@ import { ProductController } from 'product/controller/productController';
 import { BusinessService } from 'business/service/business.service';
 import { BusinessController } from 'business/controller/business.controller';
 import { SaleController } from 'sales/controller/sale.controller';
-
+import {
+  ProductData,
+  ProductDataSchema,
+} from 'product/model/productData.schema';
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
@@ -26,6 +29,9 @@ import { SaleController } from 'sales/controller/sale.controller';
       { name: Business.name, schema: BusinessSchema },
     ]),
     MongooseModule.forFeature([{ name: Product.name, schema: ProductSchema }]),
+    MongooseModule.forFeature([
+      { name: ProductData.name, schema: ProductDataSchema },
+    ]),
     MongooseModule.forFeature([{ name: Sale.name, schema: SaleSchema }]),
   ],
   controllers: [

@@ -1,47 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { UserService } from 'auth/user/service/user.service';
 import { CodeVerification } from './interfaces/codeVerification.interface';
-import { User } from 'auth/user/user.schema';
-
-@Injectable()
-export class VerificationService {
-  constructor(private readonly userService: UserService) {}
-
-  async verifyCode(verificationData: CodeVerification) {
-    const foundUser = await this.userService.findByEmail(
-      verificationData.email,
-    );
-
-    if (!foundUser) {
-      throw new Error('User not found');
-    }
-
-    if (foundUser.emailVerificationCode === verificationData.code) {
-      try {
-        foundUser.isEmailVerified = true;
-        const updatedUser = await foundUser.save();
-        return updatedUser;
-      } catch (error) {
-        throw new Error('Failed to verify code');
-      }
-    }
-  }
-}
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { UserService } from 'auth/users/users.service';
-import { CodeVerification } from './interfaces/codeVerification.interface';
-import { User } from 'auth/users/user.schema';
 import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 import { AuthService } from 'auth/auth.service';
-const ms = require('ms');
 @Injectable()
 export class VerificationService {
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
     private readonly authService: AuthService,
   ) {}
   /**
@@ -65,6 +32,7 @@ export class VerificationService {
         const updatedUser = await foundUser.save();
         return updatedUser;
       } catch (error) {
+        console.log(error);
         throw new HttpException(
           'Error al verificar el codigo',
           HttpStatus.BAD_REQUEST,
@@ -92,18 +60,15 @@ export class VerificationService {
       throw new HttpException('Usuario no encontrado', HttpStatus.BAD_REQUEST);
     }
 
-    if (
-      foundUser.userCodesDetails.passwordResetToken === verificationData.code
-    ) {
+    if (foundUser.codeDetails.passwordResetToken === verificationData.code) {
       try {
         if (
-          foundUser.userCodesDetails.passwordResetTokenExpires <
-          new Date(Date.now())
+          foundUser.codeDetails.passwordResetTokenExpires < new Date(Date.now())
         ) {
           throw new HttpException('Codigo Expirado', HttpStatus.BAD_REQUEST);
         }
-        foundUser.userCodesDetails.passwordResetToken = null;
-        foundUser.userCodesDetails.passwordResetTokenExpires = null;
+        foundUser.codeDetails.passwordResetToken = null;
+        foundUser.codeDetails.passwordResetTokenExpires = null;
 
         const accessToken = await this.jwtService.signAsync({
           email: foundUser.email,
@@ -134,6 +99,7 @@ export class VerificationService {
 
         return { accessToken };
       } catch (error) {
+        console.log(error);
         throw new HttpException(
           'Error al verificar el codigo',
           HttpStatus.BAD_REQUEST,
