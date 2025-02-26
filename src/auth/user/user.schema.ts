@@ -3,7 +3,6 @@ import { HydratedDocument, Document, Types } from 'mongoose';
 import { Role } from 'utils/enums/roles.enum';
 import { v4 as uuid } from 'uuid';
 
-
 export type UserDocument = HydratedDocument<User>;
 
 @Schema()
@@ -13,8 +12,6 @@ export class User extends Document<Types.ObjectId> {
 
     unique: true,
     default: function genUUID() {
-
-
       return uuid();
     },
   })
@@ -52,6 +49,9 @@ export class User extends Document<Types.ObjectId> {
 
   @Prop({ default: new Date() })
   creationDate: string;
+
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Business' }] })
+  businesses: Types.ObjectId[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

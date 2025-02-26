@@ -21,8 +21,10 @@ import { CommentModule } from '@blog/comment/comment.module';
 import { VerificationController } from './verification/verification.controller';
 import { VerificationService } from './verification/verification.service';
 import { VerificationModule } from './verification/verification.module';
-import { UsersModule } from 'auth/users/user.module';
-
+import { UsersModule } from 'auth/user/user.module';
+import { ProductModule } from './product/module/product.module';
+import { AIInsightModule } from './AI/module/ai.module';
+import { InventoryModule } from './inventory/module/inventory.module';
 @Module({
   imports: [
     AuthModule,
@@ -30,7 +32,6 @@ import { UsersModule } from 'auth/users/user.module';
       secret: 'secret',
       signOptions: { expiresIn: '1h' },
     }),
-
     LoggerModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => {
@@ -59,6 +60,9 @@ import { UsersModule } from 'auth/users/user.module';
     CommentModule,
     UsersModule,
     VerificationModule,
+    ProductModule,
+    AIInsightModule,
+    InventoryModule,
   ],
   controllers: [
     AppController,
@@ -67,7 +71,6 @@ import { UsersModule } from 'auth/users/user.module';
     VerificationController,
   ],
   providers: [AppService, VerificationService],
-
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

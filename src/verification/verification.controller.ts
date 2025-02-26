@@ -10,7 +10,7 @@ import { Public } from 'utils';
 import { VerificationService } from './verification.service';
 import { CodeVerification } from './interfaces/codeVerification.interface';
 import { CurrentUser } from 'utils/decorators/current-user.decorator';
-import { User } from 'auth/users/user.schema';
+import { User } from 'auth/user/user.schema';
 import { VerificationTypes } from 'utils/enums/verificationType.enum';
 @Controller('verification')
 export class VerificationController {

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { UserService } from 'auth/users/users.service';
+import { UserService } from 'auth/user/service/user.service';
 import { CodeVerification } from './interfaces/codeVerification.interface';
-import { User } from 'auth/users/user.schema';
+import { User } from 'auth/user/user.schema';
 
 @Injectable()
 export class VerificationService {

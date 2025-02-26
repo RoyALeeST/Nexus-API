@@ -1,19 +1,21 @@
 import {
   BadRequestException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { User } from './users/user.schema';
+import { User } from './user/user.schema';
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from './users/users.service';
+import { UserService } from './user/service/user.service';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 import { Role } from 'utils/enums/roles.enum';
 import { MailService } from 'mail/mail.service';
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const ms = require('ms');
 
 @Injectable()
@@ -35,7 +37,7 @@ export class AuthService {
    * @param user - User data to register
    * @returns Promise resolving to the created User
    */
-  async register(user: User, response: Response): Promise<User> {
+  async register(user: User): Promise<User> {
     const existingUser = await this.userModel.findOne({ email: user.email });
     if (existingUser) {
       throw new BadRequestException('User already exists');
@@ -77,6 +79,9 @@ export class AuthService {
    */
   async signIn(email: string, pass: string): Promise<{ accessToken: string }> {
     const user = await this.UserService.findOne(email);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
     const isMatch = await bcrypt.compare(pass, user?.password);
     if (!isMatch) {
       throw new UnauthorizedException();
@@ -127,11 +132,11 @@ export class AuthService {
   async login(
     userData: User,
     response: Response,
-  ): Promise<{ accessToken: string }> {
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     const user = await this.UserService.findOne(userData.email);
     const isMatch = await bcrypt.compare(userData.password, user?.password);
     if (!isMatch) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Invalid credentials');
     }
     const accessToken = await this.jwtService.signAsync({
       email: user.email,
@@ -141,6 +146,7 @@ export class AuthService {
       throw new UnauthorizedException();
     }
     user.accessToken = accessToken;
+    const refreshToken = 'REFRESH_TOKEN';
     await this.UserService.updateUser(user.id, user);
 
     const expires = new Date();
@@ -155,7 +161,7 @@ export class AuthService {
       expires,
     });
 
-    return { accessToken };
+    return { accessToken, refreshToken };
   }
 
   async verifyUser(email: string, password: string) {

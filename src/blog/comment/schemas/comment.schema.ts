@@ -1,6 +1,6 @@
-import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Schema as MongooseSchema } from 'mongoose';
-import { User } from "auth/users/user.schema";
+import { User } from 'auth/user/user.schema';
 import { v4 as uuid } from 'uuid';
 import { Document } from 'mongoose';
 
@@ -11,7 +11,6 @@ export class Comment extends Document<MongooseSchema.Types.ObjectId> {
     unique: true,
 
     default: function genUUID() {
-
       return uuid();
     },
   })
@@ -28,7 +27,7 @@ export class Comment extends Document<MongooseSchema.Types.ObjectId> {
 
   @Prop({ default: false })
   deleted: boolean;
-  
+
   @Prop({ type: [MongooseSchema.Types.ObjectId], ref: 'User' })
   upvoteUsers: User[];
 

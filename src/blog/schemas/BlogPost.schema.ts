@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 import { v4 as uuid } from 'uuid';
-import { User } from 'auth/users/user.schema';
+import { User } from 'auth/user/user.schema';
 import { CommentSchema } from '@blog/comment/schemas/comment.schema';
 
 @Schema()
@@ -10,7 +10,6 @@ export class BlogPost extends Document<MongooseSchema.Types.ObjectId> {
     required: true,
     unique: true,
     default: function genUUID() {
-
       return uuid();
     },
   })

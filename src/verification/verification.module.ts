@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { UserSchema } from 'auth/users/user.schema';
+import { UserSchema } from 'auth/user/user.schema';
 import { VerificationService } from './verification.service';
 import { VerificationController } from './verification.controller';
-import { UserService } from 'auth/users/users.service';
-import { UsersModule } from 'auth/users/user.module';
+import { UserService } from 'auth/user/service/user.service';
+import { UsersModule } from 'auth/user/user.module';
 
 @Module({
   imports: [
