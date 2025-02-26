@@ -78,7 +78,7 @@ This template was made with a well-defined directory structure.
 
 ```sh
 src/
-├── modules
+├── {modules}
 │   ├── app.module.ts
 │   ├── common/  # The common module contains pipes, guards, service and provider used in the whole application
 │   ├── passenger/  # A module example that manages "passenger" resources
@@ -92,6 +92,8 @@ src/
 │   │   ├── passenger.module.ts
 │   │   ├── service/
 │   │   │   └── passenger.service.ts
+│   │   ├── enum/
+│   │   │   └── passenger.enum.ts
 │   │   └── spec/
 │   └── tokens.ts
 └── server.ts

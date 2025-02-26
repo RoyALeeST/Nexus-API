@@ -4,7 +4,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { BlogController } from './blog.controller';
 import { BlogPost, BlogPostSchema } from './schemas/BlogPost.schema';
 import { BlogService } from './blog.service';
-import { UsersModule } from 'auth/users/user.module';
+import { UsersModule } from 'auth/user/user.module';
 import { AuthModule } from 'auth/auth.module';
 
 @Module({

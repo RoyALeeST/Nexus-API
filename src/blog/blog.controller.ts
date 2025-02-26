@@ -13,7 +13,7 @@ import { Request } from 'express';
 import { BlogService } from './blog.service';
 import { Public } from '@decorators/public.decorator';
 import { AuthGuard } from 'auth/auth.guard';
-import { User } from 'auth/users/user.schema';
+import { User } from 'auth/user/user.schema';
 import { BlogPostResponseDto } from './dtos/blogpost-response.dto';
 import { CreateBlogPostDto } from './dtos/blogpost-create.dto';
 import { UpdateBlogPostDto } from './dtos/blogpost-update.dto';
@@ -33,7 +33,7 @@ export class BlogController {
   @UseGuards(AuthGuard)
   async createPost(
     @Req() req: Request & { locals: { user: User } },
-    @Body() createPostDto: CreateBlogPostDto
+    @Body() createPostDto: CreateBlogPostDto,
   ): Promise<BlogPostResponseDto> {
     createPostDto.author = req.locals.user;
     const createdPost = await this.blogService.createPost(createPostDto);
@@ -45,9 +45,13 @@ export class BlogController {
   async updatePost(
     @Param('id') id: string,
     @Req() req: Request & { locals: { user: User } },
-    @Body() updatePostDto: UpdateBlogPostDto
+    @Body() updatePostDto: UpdateBlogPostDto,
   ): Promise<BlogPostResponseDto> {
-    const updatedPost = await this.blogService.updatePost(id, req.locals.user._id, updatePostDto);
+    const updatedPost = await this.blogService.updatePost(
+      id,
+      req.locals.user._id,
+      updatePostDto,
+    );
     return BlogPostResponseDto.fromDocument(updatedPost);
   }
 
@@ -56,16 +60,14 @@ export class BlogController {
   // TODO: Add middleware to verify if the user making the request is an admin.
   async deletePost(
     @Param('id') id: string,
-    @Req() req: Request & { locals: { user: User } }
+    @Req() req: Request & { locals: { user: User } },
   ): Promise<void> {
     await this.blogService.deletePost(id, req.locals.user._id);
   }
 
   @Get(':id')
   @Public()
-  async getPostById(
-    @Param('id') id: string
-  ): Promise<BlogPostResponseDto> {
+  async getPostById(@Param('id') id: string): Promise<BlogPostResponseDto> {
     const post = await this.blogService.getPostById(id);
     return BlogPostResponseDto.fromDocument(post);
   }
@@ -73,7 +75,7 @@ export class BlogController {
   @Get('author/:authorPublicId')
   @Public()
   async getPostsByAuthor(
-    @Param('authorPublicId') authorPublicId: string
+    @Param('authorPublicId') authorPublicId: string,
   ): Promise<BlogPostResponseDto[]> {
     const posts = await this.blogService.getPostsByAuthor(authorPublicId);
     return posts.map(BlogPostResponseDto.fromDocument);

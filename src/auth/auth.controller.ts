@@ -2,8 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  HttpCode,
-  HttpStatus,
   Post,
   Req,
   Res,
@@ -17,9 +15,9 @@ import { AuthGuard } from './auth.guard';
 import { Roles } from '@decorators/roles.decorator';
 import { Role } from 'utils/enums/roles.enum';
 import { RolesGuard } from './roles.guard';
-import { User } from './users/user.schema';
+import { User } from './user/user.schema';
 import { CurrentUser } from '@decorators/current-user.decorator';
-import { UserResponseDto } from './users/userResponse.dto';
+import { UserResponseDto } from './user/userResponse.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -33,11 +31,10 @@ export class AuthController {
    * @param body - Request body containing login credentials
    * @returns Object containing success message and user data
    */
-  @HttpCode(HttpStatus.OK)
   @Post('login')
   @Public()
-  signIn(@Body() signInDto: any) {
-    return this.authService.signIn(signInDto.email, signInDto.password);
+  login(@Body() body: any, @Res({ passthrough: true }) response: Response) {
+    return this.authService.login(body, response as any);
   }
 
   /**
@@ -47,11 +44,8 @@ export class AuthController {
    */
   @Post('register')
   @Public()
-  async register(
-    @Body() body: any,
-    @Res({ passthrough: true }) response: Response,
-  ) {
-    const user = await this.authService.register(body, response as any);
+  async register(@Body() body: any) {
+    const user = await this.authService.register(body);
 
     return {
       message: 'Register successful',
@@ -94,15 +88,6 @@ export class AuthController {
       message: 'Profile fetched successfully',
       data: req.locals.user,
     };
-  }
-
-  @Post('login-cookie')
-  @Public()
-  loginCookie(
-    @Body() body: any,
-    @Res({ passthrough: true }) response: Response,
-  ) {
-    return this.authService.login(body, response as any);
   }
 
   @Get('test')

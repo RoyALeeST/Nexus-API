@@ -1,4 +1,9 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
@@ -6,8 +11,7 @@ import { BlogPost } from './schemas/BlogPost.schema';
 import { CreateBlogPostDto } from './dtos/blogpost-create.dto';
 import { IBlogService } from './blog.service.interface';
 import { UpdateBlogPostDto } from './dtos/blogpost-update.dto';
-import { User } from 'auth/users/user.schema';
-
+import { User } from 'auth/user/user.schema';
 
 @Injectable()
 export class BlogService implements IBlogService {
@@ -32,7 +36,6 @@ export class BlogService implements IBlogService {
     }
   }
 
-
   /**
    * Creates a new blog post
    * @param {CreateBlogPostDto} createPostDto - Dto for the post to create
@@ -47,7 +50,6 @@ export class BlogService implements IBlogService {
     }
   }
 
-
   /**
    * Updates an existing blog post
    * @param {string} id - ID of the post to update
@@ -55,47 +57,54 @@ export class BlogService implements IBlogService {
    * @param {UpdateBlogPostDto} updatePostDto - Update dto for the post
    * @returns {Promise<BlogPost>} The updated blog post
    */
-  async updatePost(id: string, userId: Types.ObjectId, updatePostDto: UpdateBlogPostDto): Promise<BlogPost> {
+  async updatePost(
+    id: string,
+    userId: Types.ObjectId,
+    updatePostDto: UpdateBlogPostDto,
+  ): Promise<BlogPost> {
     try {
       const post = await this.blogPostModel
         .findOne({ publicId: id })
         .populate('author', '_id');
-  
+
       if (!post) {
         throw new NotFoundException('El post no fue encontrado');
       }
-  
+
       if (!post.author._id.equals(userId)) {
-        throw new ForbiddenException('No tienes permisos para actualizar este post');
+        throw new ForbiddenException(
+          'No tienes permisos para actualizar este post',
+        );
       }
-  
+
       const updatedPost = await this.blogPostModel
         .findOneAndUpdate(
           { publicId: id },
           {
-            $set: { 
+            $set: {
               title: updatePostDto.title,
               content: updatePostDto.content,
-            }
+            },
           },
-          { new: true }
+          { new: true },
         )
         .populate('author', 'publicId name username');
-  
 
       if (!updatedPost) {
         throw new NotFoundException('El post no fue actualizado');
-      };
+      }
 
       return updatedPost;
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof ForbiddenException) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
         throw error;
       }
 
       throw new BadRequestException('Error al actualizar el post');
     }
-    
   }
 
   /**
@@ -111,20 +120,22 @@ export class BlogService implements IBlogService {
         .exec();
 
       if (!userId.equals(postToDelete.author._id)) {
-        throw new ForbiddenException('No tienes permisos para eliminar este post');
+        throw new ForbiddenException(
+          'No tienes permisos para eliminar este post',
+        );
       }
 
       const deleteResult = await this.blogPostModel
         .findOneAndUpdate(
-          { publicId: id , deleted: false },
-          { $set:
-            { deleted: true }
-          }
+          { publicId: id, deleted: false },
+          { $set: { deleted: true } },
         )
         .exec();
 
       if (!deleteResult) {
-        throw new NotFoundException('El post no fue encontrado o ya fue eliminado');
+        throw new NotFoundException(
+          'El post no fue encontrado o ya fue eliminado',
+        );
       }
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -172,12 +183,11 @@ export class BlogService implements IBlogService {
       const posts = await this.blogPostModel
         .find({
           author: author._id,
-          deleted: false
+          deleted: false,
         })
         .populate('author', 'publicId name username')
         .sort({ creationDate: -1 })
         .exec();
-
 
       return posts;
     } catch (error) {
