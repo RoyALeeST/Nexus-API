@@ -20,6 +20,14 @@ export class UserService {
     return this.userModel.findOne({ email: email });
   }
 
+  async findByEmailVerificationCode(
+    emailVerificationCode: number,
+  ): Promise<UserDocument | undefined> {
+    return this.userModel.findOne({
+      'userCodesDetails.emailVerificationCode': emailVerificationCode,
+    });
+  }
+
   async createUser(userData: any): Promise<User> {
     const user = new this.userModel(userData);
     return user.save();
