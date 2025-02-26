@@ -2,8 +2,8 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Document, Types } from 'mongoose';
 import { Role } from 'utils/enums/roles.enum';
 import { v4 as uuid } from 'uuid';
-import { UserCodesDetails } from 'auth/users/interfaces/useCodesDetails.interface';
-import { UserVerificationDetails } from 'auth/users/interfaces/userVerificationDeatils.interface';
+import { UserCodesDetails } from 'auth/user/interfaces/useCodesDetails.interface';
+import { UserVerificationDetails } from 'auth/user/interfaces/userVerificationDeatils.interface';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -17,7 +17,7 @@ export class User extends Document<Types.ObjectId> {
       return uuid();
     },
   })
-  publicId: string;
+  userId: string;
 
   @Prop()
   username: string;

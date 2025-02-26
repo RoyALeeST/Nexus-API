@@ -20,11 +20,11 @@ export class CommentService implements ICommentService {
   ): Promise<Comment> {
     const blogPost = await this.blogPostModel
       .findOneAndUpdate(
-        { publicId: blogPostId },
+        { userId: blogPostId },
         { $push: { comments: comment } },
         { new: true },
       )
-      .populate('comments.author', 'publicId name username');
+      .populate('comments.author', 'userId name username');
 
     if (!blogPost) {
       throw new NotFoundException('Blog post not found');
