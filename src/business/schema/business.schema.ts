@@ -4,6 +4,7 @@ import { v4 as uuid } from 'uuid';
 import { Product } from '../../product/model/product.schema';
 import { User } from 'auth/user/schema/user.schema';
 import { Sale } from '../../sales/schema/sale.schema';
+import { BusinessCategory } from 'business/enums/businessCategory.enum';
 
 export type BusinessDocument = Business & Document;
 
@@ -21,8 +22,8 @@ export class Business {
   @Prop({ required: true })
   name: string;
 
-  @Prop({ required: true })
-  category: string; // Ej: "Miscelánea", "Restaurante", "Maquiladora"
+  @Prop({ required: true, type: String, enum: BusinessCategory })
+  category: BusinessCategory;
 
   @Prop({ required: true, type: SchemaTypes.ObjectId, ref: 'User' })
   owner: User;

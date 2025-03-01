@@ -1,10 +1,10 @@
 import { Product } from 'product/model/product.schema';
-
+import { ProductCategory } from 'product/enum/productCategory.enum';
 export class ProductResponseDto {
   private productId: string;
   private businessId: string;
   private name: string;
-  private category: string;
+  private category: ProductCategory;
   private measurementType: string;
   private price: number;
   private unit: string;
