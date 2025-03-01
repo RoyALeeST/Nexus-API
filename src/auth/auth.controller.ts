@@ -15,7 +15,7 @@ import { AuthGuard } from './auth.guard';
 import { Roles } from '@decorators/roles.decorator';
 import { Role } from 'utils/enums/roles.enum';
 import { RolesGuard } from './roles.guard';
-import { User } from './user/user.schema';
+import { User } from './user/schema/user.schema';
 import { CurrentUser } from '@decorators/current-user.decorator';
 import { UserResponseDto } from './user/userResponse.dto';
 

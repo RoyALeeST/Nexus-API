@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 import { v4 as uuid } from 'uuid';
-import { User } from 'auth/user/user.schema';
+import { User } from 'auth/user/schema/user.schema';
 import { CommentSchema } from '@blog/comment/schemas/comment.schema';
 
 @Schema()
@@ -13,7 +13,7 @@ export class BlogPost extends Document<MongooseSchema.Types.ObjectId> {
       return uuid();
     },
   })
-  publicId: string;
+  userId: string;
 
   @Prop()
   title: string;

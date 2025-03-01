@@ -1,5 +1,5 @@
 import { IsString } from 'class-validator';
-import { User } from 'auth/user/user.schema';
+import { User } from 'auth/user/schema/user.schema';
 
 export class CreateBlogPostDto {
   @IsString()

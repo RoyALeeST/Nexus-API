@@ -9,7 +9,7 @@ import { ProductDocument } from 'product/model/product.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Sale, SaleDocument } from 'sales/schema/sale.schema';
 import { Model } from 'mongoose';
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 
 @Injectable()
 export class SaleService {
@@ -21,7 +21,15 @@ export class SaleService {
 
   async registerSale(data: any): Promise<Sale> {
     const sale = new this.saleModel(data);
-    await sale.save();
+    try {
+      await sale.save();
+    } catch (error) {
+      console.log(error);
+      throw new HttpException(
+        'Error al registrar la venta',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
 
     // Descontar del inventario
     for (const item of data.products) {
