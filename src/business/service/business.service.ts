@@ -21,16 +21,18 @@ export class BusinessService {
   /**
    * Creates a new business and associates it with a user
    * @param createBusinessDto - The DTO containing business creation data
+   * @param user - The user to associate the business with
    * @returns A BusinessResponseDto containing the created business information
    * @throws NotFoundException if the owner user is not found
    */
   async createBusiness(
     createBusinessDto: CreateBusinessDto,
+    user: User,
   ): Promise<BusinessResponseDto> {
-    const { ownerId } = createBusinessDto;
-
     // Find the user to attach the business
-    const owner = await this.userModel.findOne({ userId: ownerId });
+    const owner = await this.userModel.findOne({
+      userId: user.userId,
+    });
     if (!owner) {
       throw new NotFoundException('User not found');
     }

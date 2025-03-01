@@ -10,8 +10,8 @@ export class ProductController {
 
   @Post()
   @UseGuards(AuthGuard)
-  async createProduct(@Body() dto: CreateProductDto) {
-    return this.productService.createProduct(dto);
+  async createProduct(@Body() newProduct: CreateProductDto) {
+    return this.productService.createProduct(newProduct);
   }
 
   @Get('user/:userId')

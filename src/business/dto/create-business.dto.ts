@@ -8,8 +8,4 @@ export class CreateBusinessDto {
   @IsString()
   @IsNotEmpty()
   category: BusinessCategory; // Type of business (e.g., "Miscelánea", "Restaurante")
-
-  @IsString()
-  @IsNotEmpty()
-  ownerId: string; // Reference to the user who owns this business
 }

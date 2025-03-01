@@ -16,7 +16,7 @@ export class AuthenticationMiddleware implements NestMiddleware {
   ) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
-    const token = this.extractTokenFromHeader(req);
+    const token = this.extractTokenFromHeader(req)?.replace('Bearer ', '');
     if (token) {
       try {
         const payload = await this.jwtService.verifyAsync(token, {
@@ -31,7 +31,6 @@ export class AuthenticationMiddleware implements NestMiddleware {
         }
         req.locals = { ...req.locals, user };
         next();
-        return;
       } catch (error) {
         console.log(error);
         throw new UnauthorizedException('Autorizacion Invalida', error.message);
